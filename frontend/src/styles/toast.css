@@ -1,0 +1,123 @@
+#toastBox {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  z-index: 6000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(360px, calc(100vw - 28px));
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.toast {
+  --toast-accent: #64b5f6;
+  width: max-content;
+  max-width: 100%;
+  min-height: 46px;
+  background: rgba(23, 33, 43, .96);
+  color: #e8eaed;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px 10px 10px;
+  position: relative;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(255, 255, 255, .06);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .38);
+  backdrop-filter: blur(12px);
+  animation: toastIn .18s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.toast.leaving {
+  animation: toastOut .16s ease-in forwards;
+}
+
+.toast.success {
+  --toast-accent: #4dcd5d;
+}
+
+.toast.error {
+  --toast-accent: #ff5b5b;
+}
+
+.toast.info {
+  --toast-accent: #64b5f6;
+}
+
+.toast-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--toast-accent) 18%, transparent);
+  border: 1px solid color-mix(in srgb, var(--toast-accent) 60%, transparent);
+  color: var(--toast-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.toast.error .toast-icon::before {
+  content: '!';
+}
+
+.toast.info .toast-icon::before {
+  content: 'i';
+}
+
+.toast.success .toast-icon::before {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.toast-message {
+  min-width: 0;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+  }
+}
+
+@media (max-width: 560px) {
+  #toastBox {
+    bottom: 18px;
+    width: calc(100vw - 24px);
+  }
+
+  .toast {
+    width: 100%;
+    min-height: 44px;
+    font-size: 13px;
+    padding: 9px 12px 9px 9px;
+  }
+}
+

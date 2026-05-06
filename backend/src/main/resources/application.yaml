@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: telegram-clone
+
+  datasource:
+    # H2 file-based database — data persists across restarts in ./data/telegram-clone.db
+    url: jdbc:h2:file:./data/telegram-clone
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      # H2 web console available at http://localhost:8080/h2-console (useful for debugging)
+      enabled: true
+      path: /h2-console
+
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 220MB
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    # Disable open-in-view: keeps the JPA session bound to the transaction only, not to the HTTP request.
+    # Best practice — prevents accidental lazy-loading queries during view rendering.
+    open-in-view: false
+
+  # Spring uses JavaMailSender under the hood — we just configure the SMTP server here.
+  # Gmail requires an App Password (not your real password) — generate it in Google Account > Security > 2-Step Verification > App Passwords.
+  # MAIL_USERNAME and MAIL_PASSWORD are environment variables — set them in IntelliJ via Run > Edit Configurations > Environment Variables.
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            # STARTTLS upgrades the plain connection to an encrypted one — required by Gmail on port 587.
+            enable: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    # Token lifetime in seconds — 604800 = 7 days.
+    ttl: 604800
+  otp:
+    # How many minutes before the OTP expires.
+    expiry-minutes: 5

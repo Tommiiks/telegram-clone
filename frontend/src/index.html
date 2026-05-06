@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Telegram Clone</title>
+    <link rel="icon" href="../public/assets/icons/ico.png" />
+    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="stylesheet" href="./styles/toast.css" />
+    <link rel="stylesheet" href="./styles/spinner.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- =========================================================
+         APP SHELL
+         ========================================================= -->
+    <div class="app">
+
+      <!-- ====================================================
+           SIDEBAR
+           ==================================================== -->
+      <div class="sidebar" id="sidebar">
+
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+          <button class="icon-btn" id="menuBtn" title="Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input class="sidebar-search" id="searchInput" type="text" placeholder="Search..." autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Menu Drawer (slides over sidebar) -->
+        <div class="menu-drawer" id="menuDrawer">
+          <div class="menu-user-section">
+            <div id="menuAvatar"></div>
+            <div class="menu-user-info">
+              <div class="menu-user-name" id="menuUserName">Loading…</div>
+              <div class="menu-user-handle" id="menuUserHandle"></div>
+            </div>
+          </div>
+          <div class="menu-items">
+            <div class="menu-item" id="profileMenuItem">
+              <i class="fa-solid fa-user"></i>
+              <span>My Profile</span>
+            </div>
+            <div class="menu-item danger" id="logoutMenuItem">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              <span>Logout</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversations List -->
+        <div class="conversations-list" id="conversationsList">
+          <!-- skeleton while loading -->
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+            </div>
+          </div>
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+            </div>
+          </div>
+          <div class="skeleton-item">
+            <div class="skeleton-circle"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line short"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Results Panel (replaces conversations list) -->
+        <div class="search-panel" id="searchPanel" hidden>
+          <div class="search-panel-title">Utenti</div>
+          <div id="searchResults"></div>
+        </div>
+
+      </div><!-- /sidebar -->
+
+      <!-- ====================================================
+           MAIN AREA
+           ==================================================== -->
+      <div class="main-area">
+
+        <!-- Welcome screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+          <img src="../public/assets/icons/ico.png" alt="logo" />
+          <h2>Telegram Clone</h2>
+          <p>Seleziona una chat per iniziare a messaggiare</p>
+        </div>
+
+        <!-- Chat Area (hidden until a conversation is opened) -->
+        <div class="chat-area" id="chatArea" hidden>
+
+          <!-- Chat Header -->
+          <div class="chat-header">
+            <div class="chat-header-left">
+              <div class="chat-header-avatar-wrap">
+                <div id="chatHeaderAvatar"></div>
+                <div class="online-dot on-header" id="chatHeaderOnlineDot" hidden></div>
+              </div>
+              <div class="chat-header-info">
+                <div class="chat-header-name" id="chatHeaderName"></div>
+                <div class="chat-header-status" id="chatHeaderStatus"></div>
+              </div>
+            </div>
+            <div class="chat-header-actions">
+              <button class="icon-btn" id="chatInfoBtn" title="Profilo">
+                <i class="fa-solid fa-circle-info"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Area -->
+          <div class="messages-area" id="messagesArea">
+            <div class="messages-list" id="messagesList"></div>
+          </div>
+
+          <!-- Input Area -->
+          <div class="input-area">
+            <!-- Reply bar (shown when replying to a message) -->
+            <div class="reply-bar" id="replyBar" hidden>
+              <div class="reply-bar-icon"><i class="fa-solid fa-reply"></i></div>
+              <div class="reply-bar-content">
+                <div class="reply-bar-title" id="replyBarTitle">Risposta</div>
+                <div class="reply-bar-preview" id="replyBarPreview"></div>
+              </div>
+              <button class="icon-btn" id="cancelReplyBtn" title="Annulla">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Edit bar (shown when editing a message) -->
+            <div class="edit-bar" id="editBar" hidden>
+              <div class="edit-bar-icon"><i class="fa-solid fa-pen"></i></div>
+              <div class="edit-bar-content">
+                <div class="edit-bar-title">Modifica messaggio</div>
+                <div class="edit-bar-preview" id="editBarPreview"></div>
+              </div>
+              <button class="icon-btn" id="cancelEditBtn" title="Annulla">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div class="input-row">
+              <button class="icon-btn" id="attachBtn" title="Allega file">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <input type="file" id="fileInput" multiple hidden />
+
+              <div class="message-input-wrap">
+                <textarea
+                  id="messageInput"
+                  class="message-input"
+                  placeholder="Scrivi un messaggio…"
+                  rows="1"
+                ></textarea>
+                <span class="message-char-counter" id="messageCharCounter" hidden>0/4000</span>
+              </div>
+
+              <button class="send-btn" id="sendBtn" title="Invia">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div><!-- /input-area -->
+
+        </div><!-- /chat-area -->
+
+        <!-- Profile Panel (right side, slides in) -->
+        <div class="profile-panel" id="profilePanel" hidden>
+          <div class="profile-panel-header">
+            <button class="icon-btn" id="closePanelBtn"><i class="fa-solid fa-xmark"></i></button>
+            <h3>Informazioni</h3>
+          </div>
+          <div class="profile-hero">
+            <div class="profile-hero-avatar" id="profilePanelAvatar"></div>
+            <div class="profile-hero-name" id="profilePanelName"></div>
+            <div class="profile-hero-username" id="profilePanelUsername"></div>
+          </div>
+          <div class="profile-fields">
+            <div class="profile-field" id="profileFieldEmail">
+              <div class="profile-field-label">Email</div>
+              <div class="profile-field-value" id="profilePanelEmail"></div>
+            </div>
+            <div class="profile-field" id="profileFieldStatus">
+              <div class="profile-field-label">Stato</div>
+              <div class="profile-field-value" id="profilePanelStatus"></div>
+            </div>
+          </div>
+          <div class="profile-edit-fields" id="profileEditFields" hidden>
+            <label class="profile-edit-field">
+              <span>Nome</span>
+              <input id="profileDisplayNameInput" type="text" maxlength="64" autocomplete="off" />
+            </label>
+            <label class="profile-edit-field">
+              <span>Tag</span>
+              <input id="profileUsernameInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" />
+            </label>
+            <button class="modal-btn primary" id="saveProfileDetailsBtn" type="button">
+              <i class="fa-solid fa-check" style="margin-right:6px"></i> Salva modifiche
+            </button>
+          </div>
+          <div class="profile-actions" id="profilePicActions">
+            <button class="modal-btn primary" id="changeProfilePicBtn">
+              <i class="fa-solid fa-camera" style="margin-right:6px"></i> Cambia foto profilo
+            </button>
+          </div>
+          <input type="file" id="profilePicInput" accept="image/*" hidden />
+        </div>
+
+      </div><!-- /main-area -->
+
+    </div><!-- /app -->
+
+    <!-- =========================================================
+         CONTEXT MENU
+         ========================================================= -->
+    <div class="context-menu" id="contextMenu" hidden>
+      <div class="context-item" id="ctxReply">
+        <i class="fa-solid fa-reply"></i> Rispondi
+      </div>
+      <div class="context-item" id="ctxCopy">
+        <i class="fa-solid fa-copy"></i> Copia
+      </div>
+      <div class="context-item" id="ctxEdit">
+        <i class="fa-solid fa-pen"></i> Modifica
+      </div>
+      <div class="context-item danger" id="ctxDelete">
+        <i class="fa-solid fa-trash"></i> Elimina
+      </div>
+    </div>
+
+    <div class="context-menu" id="conversationContextMenu" hidden>
+      <div class="context-item danger" id="convCtxDelete">
+        <i class="fa-solid fa-trash"></i> Elimina chat
+      </div>
+    </div>
+
+    <div class="confirm-overlay" id="confirmDialog" hidden>
+      <div class="confirm-box">
+        <h2 id="confirmTitle">Conferma</h2>
+        <p id="confirmMessage"></p>
+        <div class="confirm-actions">
+          <button class="confirm-btn" id="confirmCancelBtn" type="button">Annulla</button>
+          <button class="confirm-btn danger" id="confirmOkBtn" type="button">Elimina</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         IMAGE VIEWER
+         ========================================================= -->
+    <div class="image-viewer" id="imageViewer" hidden>
+      <img id="imageViewerImg" src="" alt="preview" />
+    </div>
+
+    <!-- =========================================================
+         ATTACHMENT COMPOSER
+         ========================================================= -->
+    <div class="attachment-overlay" id="attachmentComposer" hidden>
+      <div class="attachment-box">
+        <div class="attachment-header">
+          <h2 id="attachmentTitle">Invia allegati</h2>
+          <button class="icon-btn" id="closeAttachmentBtn" type="button" title="Chiudi">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="attachment-previews" id="attachmentPreviews"></div>
+        <label class="attachment-option">
+          <input id="sendAsDocument" type="checkbox" />
+          <span>Invia come documento</span>
+        </label>
+        <label class="attachment-caption">
+          <span>Didascalia</span>
+          <textarea id="attachmentCaption" rows="1"></textarea>
+        </label>
+        <div class="attachment-footer">
+          <button class="attachment-link-btn" id="addAttachmentBtn" type="button">Aggiungi</button>
+          <div class="attachment-footer-actions">
+            <button class="attachment-link-btn" id="cancelAttachmentBtn" type="button">Annulla</button>
+            <button class="attachment-link-btn strong" id="sendAttachmentBtn" type="button">Invia</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PROFILE PHOTO CROP
+         ========================================================= -->
+    <div class="photo-crop-overlay" id="photoCropModal" hidden>
+      <div class="photo-crop-canvas-wrap">
+        <canvas id="photoCropCanvas" width="640" height="640" aria-label="Ritaglia foto profilo"></canvas>
+      </div>
+      <div class="photo-crop-controls">
+        <button class="photo-crop-text-btn" id="cancelPhotoCropBtn" type="button">Annulla</button>
+        <button class="photo-crop-icon-btn" id="resetPhotoCropBtn" type="button" title="Adatta">
+          <i class="fa-solid fa-crop-simple"></i>
+        </button>
+        <label class="photo-crop-zoom" title="Zoom">
+          <i class="fa-solid fa-magnifying-glass-minus"></i>
+          <input id="photoCropZoom" type="range" min="1" max="3" step="0.01" value="1" />
+          <i class="fa-solid fa-magnifying-glass-plus"></i>
+        </label>
+        <button class="photo-crop-icon-btn" id="rotatePhotoCropBtn" type="button" title="Ruota">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+        <button class="photo-crop-text-btn primary" id="applyPhotoCropBtn" type="button">Imposta foto</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         PROFILE SETUP MODAL (new users)
+         ========================================================= -->
+    <div class="modal-overlay" id="profileSetupModal" hidden>
+      <div class="modal-box">
+        <img src="../public/assets/icons/ico.png" width="64" height="64" style="margin:0 auto;display:block;opacity:.8" alt="" />
+        <h2>Configura il tuo profilo</h2>
+        <p>Scegli un username e un nome visualizzato per iniziare a usare Telegram Clone.</p>
+        <input id="setupUsername" class="modal-input" type="text" placeholder="username (solo lettere, numeri, _)" autocomplete="off" />
+        <input id="setupDisplayName" class="modal-input" type="text" placeholder="Nome Cognome" autocomplete="off" />
+        <button class="modal-btn primary" id="saveProfileBtn">Salva profilo</button>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         LOADER & TOAST
+         ========================================================= -->
+    <div class="loader-overlay" id="loaderOverlay">
+      <div class="loader-spinner"></div>
+    </div>
+
+    <!-- =========================================================
+         SCRIPTS
+         ========================================================= -->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6/bundles/stomp.umd.min.js"></script>
+    <script src="./scripts/toast.js"></script>
+    <script src="./scripts/overlay.js"></script>
+    <script src="./scripts/config.js"></script>
+    <script src="./scripts/app.js"></script>
+  </body>
+</html>

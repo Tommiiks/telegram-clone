@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Telegram Clone – Login</title>
+    <link rel="stylesheet" href="../styles/login.css" />
+    <link rel="stylesheet" href="../styles/toast.css" />
+    <link rel="stylesheet" href="../styles/spinner.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="../scripts/toast.js"></script>
+    <script src="../scripts/config.js"></script>
+  </head>
+
+  <body>
+    <img width="96" height="96" src="../../public/assets/icons/ico.png" alt="Telegram Clone" />
+    <h1>Telegram</h1>
+    <span class="subtitle">Inserisci la tua email per accedere.</span>
+
+    <div id="loginContainer" class="login-container">
+      <span class="country">🇮🇹 Italy</span>
+      <input id="email" class="input-container" type="email" placeholder="email@email.com" />
+    </div>
+
+    <p class="login-hint">Premi <kbd style="background:#253341;padding:1px 5px;border-radius:4px;font-size:11px">Invio</kbd> per confermare ogni campo.</p>
+
+    <div class="loader-overlay" id="loaderOverlay">
+      <div class="loader-spinner"></div>
+    </div>
+
+    <script src="../scripts/overlay.js"></script>
+    <script>
+      const emailInput = document.getElementById('email');
+
+      function addOtpInput() {
+        const container = document.getElementById('loginContainer');
+        if (container.children.length >= 3) return;
+
+        const otpInput = document.createElement('input');
+        otpInput.placeholder = 'Inserisci il codice OTP';
+        otpInput.className = 'input-container';
+        otpInput.style.marginTop = '8px';
+        container.appendChild(otpInput);
+
+        emailInput.disabled = true;
+
+        otpInput.focus();
+        otpInput.addEventListener('keydown', async (e) => {
+          if (e.key !== 'Enter') return;
+          const code = otpInput.value.trim();
+          if (!code) { showToast('Inserisci il codice OTP', 'error'); return; }
+
+          try {
+            showOverlay();
+            const res = await fetch(`${API_URL}/api/v1/auth/verify-otp`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: emailInput.value.trim(), code })
+            });
+
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              showToast(err.message || 'Codice non valido', 'error');
+              return;
+            }
+
+            const data = await res.json();
+            localStorage.setItem('jwt', data.token);
+
+            if (data.newUser) {
+              localStorage.setItem('setupRequired', 'true');
+            } else {
+              localStorage.removeItem('setupRequired');
+            }
+
+            showToast('Accesso effettuato!', 'success');
+            setTimeout(() => { window.location.href = '../index.html'; }, 800);
+
+          } catch (err) {
+            console.error(err);
+            showToast('Errore di connessione', 'error');
+          } finally {
+            hideOverlay();
+          }
+        });
+      }
+
+      emailInput.addEventListener('keydown', async (e) => {
+        if (e.key !== 'Enter') return;
+        const email = emailInput.value.trim();
+        if (!email) { showToast('Email non valida', 'error'); return; }
+
+        try {
+          showOverlay();
+          const res = await fetch(`${API_URL}/api/v1/auth/send-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+
+          if (!res.ok) {
+            showToast('Errore durante l\'invio OTP', 'error');
+            return;
+          }
+
+          showToast('OTP inviato!', 'success');
+          addOtpInput();
+
+        } catch (err) {
+          console.error(err);
+          showToast('Errore di connessione', 'error');
+        } finally {
+          hideOverlay();
+        }
+      });
+    </script>
+  </body>
+</html>
